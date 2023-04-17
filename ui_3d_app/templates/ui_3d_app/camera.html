@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Камеры — Менеджер 3D принтеров</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="{% static 'ui_3d_app/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'ui_3d_app/css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Document</title>
+</head>
+<body>
+    <header class="nav">
+        <h1 class="laptop">Лаборатория 3D</h1>
+        <nav>
+            <ul class="nav_list">
+                <li><a href="/index" class="nav_item"><span class="laptop">Главная</span><img src="{% static 'ui_3d_app/icons/home-button.svg' %}" alt="home button" class="mobile home"></a></li>
+                <li><a href="/control" class="nav_item"><span class="laptop">Управление принтерами</span><img src="{% static 'ui_3d_app/icons/settings.svg' %}" alt="settings" class="mobile"></a></li>
+                <li><a href="/camera" class="nav_item nav_active"><span class="laptop">Камеры</span><img src="{% static 'ui_3d_app/icons/photo-camera.svg' %}" alt="photo camera" class="mobile"></a></li>
+                <li><a href="/about" class="nav_item "><span class="laptop">О проекте</span><img src="{% static 'ui_3d_app/icons/alert-symbol.svg' %}" alt="info" style="transform: rotate(180deg);" class="mobile info"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main_window">
+        <div>
+            <nav class="block nav_block">
+                <div class="container main_nav_container">
+                    <ul class="main_nav_list laptop">
+                        <form action="" method="post" id="printer">
+                        {% for prntr in printers %}
+                            {% if prntr.id == selected_printer.id %}
+                                <li><a href="/index/{{ prntr.id }}" class="main_nav_item laptop main_nav_active" type="submit">{{prntr.name}}</a></li>
+                            {% else %}
+                                <li><a href="/index/{{ prntr.id }}" class="main_nav_item laptop" type="submit">{{prntr.name}}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        </form>
+                    </ul>
+                    <form action="" method="post" id="printer">
+                        <select class="mobile main_nav_mobile">
+                            {% for prntr in printers %}
+                                {% if prntr.id == selected_printer.id %}
+                                    <option value="{{ prntr.id }}" selected>{{prntr.name}}</option>
+                                {% else %}
+                                    <option value="{{ prntr.id }}">{{prntr.name}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </nav>
+        </div>
+        <article class="block main_block camera_block">
+            <div class="container camera">
+                <img src="{{ url }}" alt="">
+            </div>
+        </article>
+    </main>
+</body>
+</html>
+
+<script type="text/javascript" src="{% static "ui_3d_app/js/script.js" %}"></script>

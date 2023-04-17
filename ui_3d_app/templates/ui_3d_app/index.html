@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная — Менеджер 3D принтеров</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="{% static 'ui_3d_app\icons\3d printer.png' %}">
+    <link rel="stylesheet" href="{% static 'ui_3d_app/css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Document</title>
+</head>
+<body>
+    <header class="nav">
+        <h1 class="laptop">Лаборатория 3D</h1>
+        <nav>
+            <ul class="nav_list">
+                <li><a href="/index" class="nav_item nav_active"><span class="laptop">Главная</span><img src="{% static 'ui_3d_app/icons/home-button.svg' %}" alt="home button" class="mobile home"></a></li>
+                <li><a href="/control" class="nav_item"><span class="laptop">Управление принтерами</span><img src="{% static 'ui_3d_app/icons/settings.svg' %}" alt="settings" class="mobile"></a></li>
+                <li><a href="/camera" class="nav_item"><span class="laptop">Камеры</span><img src="{% static 'ui_3d_app/icons/photo-camera.svg' %}" alt="photo camera" class="mobile"></a></li>
+                <li><a href="/about" class="nav_item"><span class="laptop">О проекте</span><img src="{% static 'ui_3d_app/icons/alert-symbol.svg' %}" alt="info" style="transform: rotate(180deg);" class="mobile info"></a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main_window">
+        <nav class="block nav_block">
+            <div class="container main_nav_container">
+                <ul class="main_nav_list laptop">
+                    <form action="" method="post" id="printer">
+                    {% for prntr in printers %}
+                        {% if prntr.id == selected_printer.id %}
+                            <li><a href="/index/{{ prntr.id }}" class="main_nav_item laptop main_nav_active" type="submit">{{prntr.name}}</a></li>
+                        {% else %}
+                            <li><a href="/index/{{ prntr.id }}" class="main_nav_item laptop" type="submit">{{prntr.name}}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    </form>
+                </ul>
+                <form action="" method="post" id="printer">
+                    <select class="mobile main_nav_mobile">
+                        {% for prntr in printers %}
+                            {% if prntr.id == selected_printer.id %}
+                                <option value="{{ prntr.id }}" selected>{{prntr.name}}</option>
+                            {% else %}
+                                <option value="{{ prntr.id }}">{{prntr.name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </nav>
+        <article class="block main_block">
+            <div class="status_log_container">
+                <div class="container status_container">
+                    <h2>Статус</h2>
+                    <div class="content_container status_content">
+                        {{ selected_printer.status | safe }}
+                    </div>
+                    <div class="buttons_container">
+                        {% if selected_printer.state == "printing" %}
+                        <form action="" method="post">
+                            <button class="field green" type="submit" name="pause">< Пауза ></button>
+                        </form>
+                        <form action="" method="post">
+                            <button class="field red" type="submit" name="abort">< Стоп! ></button>
+                        </form>
+                        {% elif selected_printer.state == "paused" %}
+                        <form action="" method="post">
+                            <button class="field green" type="submit" name="resume">< Продолжить ></button>
+                        </form>
+                        <form action="" method="post">
+                            <button class="field red" type="submit" name="abort">< Стоп! ></button>
+                        </form>
+                        {% elif selected_printer.state == "idle" %}
+                        <form action="" method="post">
+                            <button class="field green" type="submit" name="new_print">< Запустить печать ></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="container log_container">
+                    <h2>Лог</h2>
+                    <div class="content_container log_content">
+                        {% for log in selected_printer.logs %}
+                            {% if log.type == 'error' %}
+                                <p class="log_warning">{{ log.created_at }} | {{ log.message }}</p>
+                            {% else %}
+                                <p>{{ log.created_at }} | {{ log.message }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <a class="field camera_button" href="/camera/{{selected_printer.id}}">< Посмотреть видео с камеры ></a>
+            </div>
+            <div class="container param_container">
+                <div class="param_input_container">
+                    <h3>Параметры температуры</h3>
+                    <div class="input_container">
+                        <p class="input_label">Температура сопла</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="temp_nozzle" min="0" max="300" value="{{ current_temp_nozzle }}"><button class="field" type="submit">< OK ></button>
+                        </form>
+                        <p class="input_label">Температура стола</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="temp_bed" min="0" max="150" value="{{ current_temp_bed }}"><button class="field" type="submit">< OK ></button>
+                        </form>
+                    </div>
+                    <h3>Параметры головы</h3>
+                    <div class="input_container">
+                        <p class="input_label">Максимальная скорость</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="head_max_speed" min="0" max="2000" value="{{ current_head_max_speed }}"><button disabled class="field" type="submit" name="head_max_speed">< OK ></button>
+                        </form>
+                        <p class="input_label">Целевое ускорение</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="head_target_acceleration" min="0" max="10000" value="{{ current_head_target_acceleration }}"><button disabled class="field" type="submit" name="head_target_acceleration">< OK ></button>
+                        </form>
+                        <p class="input_label">Целевая скорость рывка</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="head_target_speed_jerk" min="0" max="150" value="{{ current_head_target_speed_jerk }}"><button disabled class="field" type="submit" name="head_target_speed_jerk">< OK ></button>
+                        </form>
+                        <p class="input_label">Положение — ось X</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="head_x_value" min="0" max="215" value="{{ current_head_x_value }}"><button disabled class="field" type="submit" name="head_x_value">< OK ></button>
+                        </form>
+                        <p class="input_label">Положение — ось Y</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="head_y_value" min="0" max="215" value="{{ current_head_y_value }}"><button disabled class="field" type="submit" name="head_y_value">< OK ></button>
+                        </form>
+                        <p class="input_label">Положение — ось Z</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="head_z_value" min="0" max="300" value="{{ current_head_z_value }}"><button disabled class="field" type="submit" name="head_z_value">< OK ></button>
+                        </form>
+                    </div>
+                    <h3>Параметры экструдера</h3>
+                    <div class="input_container">
+                        <p class="input_label">Максимальная скорость</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="extruder_max_speed" min="0" max="2000" value="{{ current_extruder_max_speed }}"><button disabled class="field" type="submit" name="extruder_max_speed">< OK ></button>
+                        </form>
+                        <p class="input_label">Целевое ускорение</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="extruder_target_acceleration" min="0" max="10000" value="{{ current_extruder_target_acceleration }}"><button disabled class="field" type="submit" name="extruder_target_acceleration">< OK ></button>
+                        </form>
+                        <p class="input_label">Целевая скорость рывка</p>
+                        <form action="" method="post">
+                            <input type="number" class="field param_input" name="extruder_target_jerk" min="0" max="150" value="{{ current_extruder_target_jerk }}"><button disabled class="field" type="submit" name="extruder_target_jerk">< OK ></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </main>
+</body>
+</html>
+
+<script type="text/javascript" src="{% static "ui_3d_app/js/script.js" %}"></script>
